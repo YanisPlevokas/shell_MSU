@@ -22,19 +22,20 @@
 void redirection_funct(char *operator, char *name)
 {
     int fileDeskriptor;
-    if (strcmp(operator, ">\0") == 0) /* file uses as a common output */
+	int isOperatorEqualBigger, isOperatorEqualBiggerX2, isOperatorEqualLess;
+    if ((isOperatorEqualBigger = strcmp(operator, ">\0")) == 0) /* file uses as a common output */
     {
         fileDeskriptor = open(name, O_TRUNC | O_CREAT | O_WRONLY, 0666);
         dup2(fileDeskriptor, 1);
         close(fileDeskriptor);
     }
-    if (strcmp(operator, "<\0") == 0) /* file uses as a common output */
+    if ((isOperatorEqualLess = strcmp(operator, "<\0")) == 0) /* file uses as a common output */
     {
         fileDeskriptor = open(name, O_RDONLY, 0666);
         dup2(fileDeskriptor, 0);
         close(fileDeskriptor);
     }
-    if (strcmp(operator, ">>\0") == 0) /* file uses as a common output & adds to the end of file*/
+    if ((isOperatorEqualBiggerX2 = strcmp(operator, ">>\0")) == 0) /* file uses as a common output & adds to the end of file*/
     {
         fileDeskriptor = open(name, O_APPEND | O_CREAT | O_WRONLY, 0666);
         dup2(fileDeskriptor, 1);

@@ -15,10 +15,10 @@
 int main(int argc, char **argv)
 {
     int i, count = 0, backgroundFlag, startPoint, sonStatus, currentPoint, counterOfProcesses, counterOfWords;
-    int process, exec;
+    int process, exec, isElementEqualAmpersand;
     char **massiv/*, ***massiv_massivov*/;
     int saveOfStandardInput, saveOfStandardOutput;
- 
+	int isOperatorEqualBigger, isOperatorEqualBiggerX2, isOperatorEqualLess;
     saveOfStandardInput = dup(STDIN_FILENO);
     saveOfStandardOutput = dup(STDOUT_FILENO);
 
@@ -33,7 +33,7 @@ int main(int argc, char **argv)
         count = 0;
         massiv = input_massiv(&count);
         if (count)
-            if (strcmp(massiv[count - 1], "&\0") == 0)
+            if ((isElementEqualAmpersand = strcmp(massiv[count - 1], "&\0")) == 0)
             {
                 backgroundFlag = 1;
                 free(massiv[count]);
@@ -49,7 +49,7 @@ int main(int argc, char **argv)
         }
         while (1) /* redirect our files */
         {
-            if ( (!(strcmp(massiv[i], "<\0") ) ) || (!(strcmp(massiv[i], ">\0")) ) || (!(strcmp(massiv[i], ">>\0")) ) )
+            if ( (!(isOperatorEqualLess = strcmp(massiv[i], "<\0") ) ) || (!(isOperatorEqualBigger = (strcmp(massiv[i], ">\0"))) ) || (!(isOperatorEqualBiggerX2 = strcmp(massiv[i], ">>\0")) ) )
             {
                 redirection_funct(massiv[i], massiv[i+1]);
                 i = i + 2;
