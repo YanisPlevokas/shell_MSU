@@ -9,16 +9,17 @@
 
 /*
  
-@description convet our input into massiv of lexems
+@description convert our input into massiv of lexems
 @params int *counter - pointer at the value of words in the line
  
 */
 
 char ** input_massiv(int *counter)
 {
-    char **massiv1;
+    char **massiv;
     int status = 0, status_symb = 0;
     int count = 0;
+	int isStringQuotes = 0;
     char *string = NULL, *check_symbol = NULL;
     list *spisok = NULL;
     if ((check_symbol = malloc(1)) == NULL)
@@ -47,17 +48,17 @@ char ** input_massiv(int *counter)
         }
         if (status == 3)
         {
-            if ((string != NULL) && ((strcmp(string, "")) != 0) )
+            if ((string != NULL) && ((isStringQuotes = strcmp(string, "")) != 0) )
             {
                 spisok = add_node(spisok, string);
             }
-            massiv1 = list_to_mas(spisok, &count);
+            massiv = list_to_mas(spisok, &count);
             free(check_symbol);
             *counter = count;
             status = 0;
             status_symb = 0;
             spisok = free_list(spisok);
-            return massiv1;
+            return massiv;
         }
     }
 }
@@ -100,10 +101,11 @@ char *** mas_to_massives(char **mass, int *elems)
 {
     char ***massiv_massivov = NULL;
     char *tester = "|\0";
+	int isWordVertical = 1;
     int currentPosition = 0, CurrentWordInMassiv, startPoint = 0, i = 0, j = 0, k = 0, counter = 0, flag = 0;
     while (mass[i] != NULL)  /* counter for sentences between | */
     {
-        if ((strcmp(mass[i], "|")) == 0)
+        if ((isWordVertical = strcmp(mass[i], "|")) == 0)
         {
             counter++;
         }
@@ -146,7 +148,7 @@ char *** mas_to_massives(char **mass, int *elems)
                 break;
             }
 
-        if ((strcmp(mass[currentPosition], tester)) == 0 ) /* if we meet | */
+        if ((isWordVertical = strcmp(mass[currentPosition], tester)) == 0 ) /* if we meet | */
         {
             printf("CYCLE1\n");
             if (j != 0) /* if there was anything before | */
@@ -201,7 +203,7 @@ char ** list_to_mas(list *node, int* count)
     }
     while (node != NULL)
     {
-        massiv[i] = node->s;
+        massiv[i] = node->string;
         node = node->next;
         i = i + 1;
     }
@@ -260,7 +262,7 @@ list * add_node(list *node, char *stringNew)
             printf("Impossible to allocate\n");
             exit(1);
         }
-        newNode->s = stringNew;
+        newNode->string = stringNew;
         newNode->next = NULL;
         node = newNode;
         return newNode;
@@ -282,7 +284,7 @@ void print_list (list *node)
 {
     while (node != NULL)
     {
-        printf("%s\n", node->s);
+        printf("%s\n", node->string);
         node = node->next;
     }
 }
@@ -303,6 +305,14 @@ int spisok_count(list *node)
     }
     return i;
 }
+
+/*
+ 
+@description inputs string
+@params int *status - pointer at status of work in this function, 
+char *symboll - pointer at the saved symbol, int *status_symb - status of the symbol, was it saved or not
+ 
+*/
 char* input_str(int *status, char *symboll, int *status_symb)
 {
     char symb, *str;
@@ -377,9 +387,7 @@ char* input_str(int *status, char *symboll, int *status_symb)
 
             if ((!quotes_flag) && (symb != EOF))
             {
-
-
-
+				
                 if ( ((symb == ';') || (symb == '>') || (symb == '(') || (symb == ')') || (symb == '<') || (symb == '|') || (symb == '&')) && (((str[0] == ';') || (str[0] == '>') || (str[0] == '<') || (str[0] == '|') || (str[0] == '&') || (str[0] == '(') || (str[0] == ')'))) && (str[0] != symb) )
                 {
                     str[lenStr] = '\0';

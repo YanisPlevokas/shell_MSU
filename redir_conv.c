@@ -102,7 +102,7 @@ char **massiv - pointer at massiv of lexems, int counterOfWords - counter of wor
 
 void conveyor(int numberOfArguments, int startPoint,  char **massiv, int counterOfWords, int backgroundFlag)
 {
-    int sonProcess, mainProcess, descriptor,  fileDescriptor[2], i = 0, nextStartPoint = startPoint, difference = 0;
+    int childProcess, mainProcess, descriptor,  fileDescriptor[2], i = 0, nextStartPoint = startPoint, difference = 0;
 
     mainProcess=fork();
     if (mainProcess==0)
@@ -117,8 +117,8 @@ void conveyor(int numberOfArguments, int startPoint,  char **massiv, int counter
         while (++i <= numberOfArguments)
         {
             pipe(fileDescriptor);
-            sonProcess = fork();
-            if (sonProcess == 0)
+            childProcess = fork();
+            if (childProcess == 0)
             {
                 if ( i != numberOfArguments)
                 {
@@ -134,7 +134,7 @@ void conveyor(int numberOfArguments, int startPoint,  char **massiv, int counter
 
             }
             else {
-                if (sonProcess == -1)
+                if (childProcess == -1)
                 {
                     printf("Error while creating son-process\n");
                     close(fileDescriptor[0]);
