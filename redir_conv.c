@@ -22,7 +22,7 @@
 void redirection_funct(char *operator, char *name)
 {
     int fileDeskriptor;
-	int isOperatorEqualBigger, isOperatorEqualBiggerX2, isOperatorEqualLess;
+    int isOperatorEqualBigger, isOperatorEqualBiggerX2, isOperatorEqualLess;
     if ((isOperatorEqualBigger = strcmp(operator, ">\0")) == 0) /* file uses as a common output */
     {
         fileDeskriptor = open(name, O_TRUNC | O_CREAT | O_WRONLY, 0666);
@@ -158,8 +158,11 @@ void conveyor(int numberOfArguments, int startPoint,  char **massiv, int counter
             free_massiv(massiv, counterOfWords);
             free(massiv);
         }
-        while (wait(NULL)!=-1);
-        exit(1);
+        if (!backgroundFlag)
+            {
+                while (wait(NULL)!=-1);
+                exit(1);
+            }
     }
     else if (mainProcess==-1)
     {
