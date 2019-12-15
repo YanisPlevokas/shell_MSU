@@ -55,7 +55,7 @@ int spisok_count(list *);
 */
 void print_massiv(char **);
 /*
- 
+
 @description free "massiv" structure
 @params  char **massiv - pointer at structure "massiv", int counter - counter of words
  
@@ -68,6 +68,18 @@ void free_massiv(char **, int);
 @params int *counter - pointer at the value of words in the line
  
 */
+
+
+
+
+
+
+
+
+int find_end(char **massiv, int);
+
+
+
 char ** input_massiv(int *);
 /*
  
@@ -84,4 +96,21 @@ int currentPoint - currentPoint, where we stand, int *counter - pointer at value
 int *blockCounter - counter of blocks in line
  
 */
-char **delete_vertical(char **, int, int*, int*);
+char **delete_vertical(char **, int );
+
+/*
+@description Возвращает 1, если скобки присутствуют в строке, 0 - иначе
+@params char **massiv - массив лексем
+*/
+
+
+int skobkaInLine(char **);
+
+/*
+@description Возвращает 0, если лексемы сбалансированны по скобкам, иначе -1
+@params char **massiv -  указатель на массив лексем
+
+*/
+
+
+int is_balanced( char **);

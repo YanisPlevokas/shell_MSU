@@ -6,19 +6,30 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-#include <sys/io.h>
+#include <sys/uio.h>
 #include "shell_str.h"
-#include "redir+conv.h"
+#include "redir_conv.h"
+#include "skobki.h"
+
+
+
+
 
 
 
 int main(int argc, char **argv)
+
 {
-    int i, count = 0, backgroundFlag, startPoint, sonStatus, currentPoint, counterOfProcesses, counterOfWords;
-    int process, exec, isElementEqualAmpersand;
-    char **massiv/*, ***massiv_massivov*/;
+    int i, count = 0, startPoint, status = 0, GlobalEnd, flag = 0;
+
+    int nextConveyorStart = 0, programMode = 0, savedProgramMode = 0;
+
+    char **massiv;
+
     int saveOfStandardInput, saveOfStandardOutput;
-	int isOperatorEqualBigger, isOperatorEqualBiggerX2, isOperatorEqualLess;
+
+    int endOfCurrentConveyor;
+
     saveOfStandardInput = dup(STDIN_FILENO);
     saveOfStandardOutput = dup(STDOUT_FILENO);
 
@@ -26,46 +37,70 @@ int main(int argc, char **argv)
 
     while (1)
     {
-        i = 0;
-        backgroundFlag = 0;
-        startPoint = 0;
         printf("Please, input data\n");
-        count = 0;
-        massiv = input_massiv(&count);
-        if (count)
-            if ((isElementEqualAmpersand = strcmp(massiv[count - 1], "&\0")) == 0)
-            {
-                backgroundFlag = 1;
-                free(massiv[count]);
-                free(massiv[count - 1]);
-                massiv[count - 1] = NULL;
-                count = count - 1;
-                printf("%d\n", count);
-            }
+        massiv = input_massiv(&GlobalEnd);
+        
         if (massiv == NULL)
         {
             printf("End of input\n");
             exit(-1);
         }
-        while (1) /* redirect our files */
-        {
-            if ( (!(isOperatorEqualLess = strcmp(massiv[i], "<\0") ) ) || (!(isOperatorEqualBigger = (strcmp(massiv[i], ">\0"))) ) || (!(isOperatorEqualBiggerX2 = strcmp(massiv[i], ">>\0")) ) )
-            {
-                redirection_funct(massiv[i], massiv[i+1]);
-                i = i + 2;
-            }
-            else break;
-        }
 
-        counterOfProcesses = 0;
-        counterOfWords = 0;
-        massiv = delete_vertical(massiv, i, &counterOfProcesses, &counterOfWords); /* Counter of words - how many words totally are */
-        conveyor(counterOfProcesses, i, massiv, counterOfWords, backgroundFlag);
-        free_massiv(massiv, counterOfWords + 1);
-        free(massiv);
+
+        if (skobkaInLine(massiv))
+        {
+            if (is_balanced(massiv))
+                {
+                    printf("Not balanced\n");
+                    break;
+                }
+                else
+                {
+                    printf("%d - the end of skobka\n", find_local_end(massiv, 1));
+                }
+        }
+        
+        startPoint = redirect(massiv, 0);
+        printf("HI\n");
+        massiv = delete_vertical(massiv, startPoint);
+
+        
+        while (nextConveyorStart < GlobalEnd)
+        {
+
+
+            printf("%d - startPoint %d - GlobalEnd\n", startPoint, GlobalEnd );
+
+            endOfCurrentConveyor = find_the_end_of_conveyor(massiv, startPoint, GlobalEnd);
+            printf("%d - endOfCurrentConveyor\n", endOfCurrentConveyor );
+            programMode = find_next_conveyor_start(massiv, &nextConveyorStart, endOfCurrentConveyor);
+            printf("%d - programMode, %d - nextConveyorStart\n", programMode, nextConveyorStart );
+
+
+            if ((savedProgramMode == 2 && status == 0 && flag == 0) || (savedProgramMode == 3 && status != 0 && flag == 0)
+            || (savedProgramMode == 0) || (savedProgramMode == 1))
+            {
+                status = conveyor(massiv, startPoint, programMode, endOfCurrentConveyor, GlobalEnd, GlobalEnd);
+            }
+            if ((savedProgramMode == 2 && status != 0) || (savedProgramMode == 3 && status == 0) )
+            {
+                break;
+            }
+            savedProgramMode = programMode;
+
+
+            startPoint = nextConveyorStart;
+            printf("%d - status\n", status);
+            saveInOutPUT(saveOfStandardInput, saveOfStandardOutput);
+        }
+        saveInOutPUT(saveOfStandardInput, saveOfStandardOutput);
+        free_massiv(massiv, GlobalEnd);
+        nextConveyorStart = 0;
+        status = 0;
+        savedProgramMode = 0;
+        programMode = 0;
         putchar('\n');
-        dup2(saveOfStandardInput, STDIN_FILENO);
-        dup2(saveOfStandardOutput, STDOUT_FILENO);
+    
     }
 
     return 0;

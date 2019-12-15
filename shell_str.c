@@ -4,9 +4,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <sys/io.h>
-#include "biblioteka.h"
-
+#include <sys/uio.h>
+#include "shell_str.h"
+#include "skobki.h"
 /*
  
 @description convert our input into massiv of lexems
@@ -61,9 +61,17 @@ char ** input_massiv(int *counter)
             return massiv;
         }
     }
+    *counter = 0;
+    return NULL;
 }
 
-
+int find_end(char **massiv, int startPoint)
+{
+    for (int i = startPoint;;i++)
+    {
+        if (massiv[i] == NULL) return i;
+    }
+}
 /*
  
 @description replases all the |-symbols in massiv into NULL
@@ -72,118 +80,21 @@ int currentPoint - currentPoint, where we stand, int *counter - pointer at value
 int *blockCounter - counter of blocks in line
  
 */
-char **delete_vertical(char **mass, int currentPoint, int *counter, int *blockCounter)
+char **delete_vertical(char **mass, int currentPoint)
 {
     int start = currentPoint;
     while (mass[currentPoint] != NULL)
     {
         if (strcmp(mass[currentPoint], "|\0" ) == 0 )
         {
+            free(mass[currentPoint]);
             mass[currentPoint] = NULL;
-            (*counter)++;
         }
         currentPoint++;
     }
-    (*counter)++;
-    (*blockCounter) = currentPoint - start;
     return mass;
-
-
 }
 
-/*
- 
-@description convert massiv into massiv_of_massiv structure
-@params  char **mass - pointer at structure maasiv, int *elems - number of elements in massiv
- 
-*/
-char *** mas_to_massives(char **mass, int *elems)
-{
-    char ***massiv_massivov = NULL;
-    char *tester = "|\0";
-	int isWordVertical = 1;
-    int currentPosition = 0, CurrentWordInMassiv, startPoint = 0, i = 0, j = 0, k = 0, counter = 0, flag = 0;
-    while (mass[i] != NULL)  /* counter for sentences between | */
-    {
-        if ((isWordVertical = strcmp(mass[i], "|")) == 0)
-        {
-            counter++;
-        }
-        i++;
-    }
-    if ((massiv_massivov = malloc(sizeof(char**)*(counter + 1))) == NULL)
-    {
-        printf("Impossible to allocate\n");
-        free(massiv_massivov);
-        exit(-1);
-    }
-    printf("ok\n");
-    i = 0;
-    while (1)
-    {
-        if (mass[currentPosition] != NULL) printf("%s\n", mass[currentPosition]);
-        flag = 0;
-        if (mass[currentPosition] == NULL)
-        {
-                printf("CYCLE1\n");
-                if (j != 0) /* if there was anything before | */
-                {
-                    if ((massiv_massivov[i] = malloc(sizeof(char*)*(j+1))) == NULL)
-                    {
-                        printf("Impossible to allocate\n");
-                        free(massiv_massivov);
-                        exit(-1);
-                    }
-                    for (CurrentWordInMassiv = 0; CurrentWordInMassiv < j; CurrentWordInMassiv++)
-                    {
-                        printf("%s\n", mass[startPoint]);
-                        massiv_massivov[i][CurrentWordInMassiv] = mass[startPoint];
-                        startPoint++;
-                    }
-                    startPoint++;
-
-                }
-                massiv_massivov[i][j] = NULL;
-                print_massiv(massiv_massivov[i]);
-                break;
-            }
-
-        if ((isWordVertical = strcmp(mass[currentPosition], tester)) == 0 ) /* if we meet | */
-        {
-            printf("CYCLE1\n");
-            if (j != 0) /* if there was anything before | */
-            {
-                if ((massiv_massivov[i] = malloc(sizeof(char*)*(j+1))) == NULL)
-                {
-                    printf("Impossible to allocate\n");
-                    free(massiv_massivov);
-                    exit(-1);
-                }
-                for (int CurrentWordInMassiv = 0; CurrentWordInMassiv < j; CurrentWordInMassiv++)
-                {
-                    printf("%s\n", mass[startPoint]);
-                    massiv_massivov[i][CurrentWordInMassiv] = mass[startPoint];
-                    startPoint++;
-                }
-                startPoint++;
-
-            }
-            massiv_massivov[i][j] = NULL;
-            print_massiv(massiv_massivov[i]);
-            i++;
-            j = 0;
-            flag = 1;
-        }
-        if (flag == 0) /* if we didn't meet | */
-        {
-            printf("CYCLE2\n");
-            j++;
-        }
-        currentPosition++;
-    }
-    *elems = i + 1;
-    return massiv_massivov;
-}
 
 /*
  
@@ -229,21 +140,68 @@ void print_massiv(char **massiv)
 
 }
 
+
+
+
+/*
+@description Возвращает 1, если скобки присутствуют в строке, 0 - иначе
+@params char **massiv - массив лексем
+*/
+
+
+int skobkaInLine(char **massiv)
+{
+    int i = 0;
+    while (massiv[i] != NULL)
+    {
+        if ((strcmp(massiv[i], "(\0") == 0) || ( strcmp(massiv[i], ")\0") == 0))
+            return 1;
+        i++;
+    }
+    return 0;
+}
+
+
+/*
+@description Возвращает 0, если лексемы сбалансированны по скобкам, иначе -1
+@params char **massiv -  указатель на массив лексем
+
+*/
+
+
+int is_balanced( char **massiv)
+{
+    int i = 0;
+    int counter = 0;
+    while (massiv[i] != NULL)
+    {
+        if (counter < 0)
+            return -1;
+        if (strcmp(massiv[i], "(\0") == 0)
+            counter++;
+        if (strcmp(massiv[i], ")\0") == 0)
+            counter--;
+        i++;
+    }
+    if (counter)
+        return -1;
+    return 0;
+}
+
 /*
  
 @description free "massiv" structure
 @params  char **massiv - pointer at structure "massiv", int counter - counter of words
  
 */
-void free_massiv(char **massiv, int counter)
+void free_massiv(char **massiv, int endPoint)
 {
-    int i = 0;
-    while ( massiv[i] != NULL )
+    for (int currentPoint = 0; currentPoint < endPoint; currentPoint++)
     {
-        free(massiv[i]);
-        massiv[i] = NULL;
-        i++;
+        if (massiv[currentPoint] != NULL)
+            free(massiv[currentPoint]);
     }
+    free(massiv);
 }
 
 /*
