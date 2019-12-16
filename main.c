@@ -63,52 +63,9 @@ int main(int argc, char **argv)
             nextConveyorStart = startPoint;
             while (nextConveyorStart < GlobalEnd)
             {
-
-                if (strcmp(massiv[startPoint], "(\0") == 0)
-                {
-                    localEnd = find_local_end(massiv, startPoint);
-                    printf("%d - localEnd\n", localEnd);
-                    if (massiv[localEnd + 1] != NULL)
-                    {
-                        if (strcmp(massiv[localEnd + 1],"&\0") == 0)
-                        {
-                            if (fork() == 0) /*Мы в сыне, созданном для фонового процесса внутри скобки*/
-                            {
-                                printf("It is background mode\n");
-                                descriptor = open("/dev/null", O_RDONLY, 0666);
-                                dup2(descriptor, 0);
-                                close(descriptor);
-                                signal(SIGINT,SIG_IGN);
-                                 /* Создаем внука для запуска фонового процесса*/
-                                if (fork() != 0)
-                                {
-                                    free_massiv(massiv, GlobalEnd);
-                                    exit(0);
-                                }
-                                else
-                                {
-                                    status = recursive_skobki(massiv, startPoint + 1, localEnd - 1, GlobalEnd);
-                                }
-                            }
-                            else
-                            {
-
-                            }
-                        }
-                    }
-                    else
-                    {
-                        printf("here\n");
-                        print_massiv(&massiv[1]);
-                        status = recursive_skobki(massiv, startPoint + 1, localEnd, GlobalEnd);
-                    }
-
-                }
-
                 printf("%d - startPoint %d - GlobalEnd\n", startPoint, GlobalEnd );
-
-                endOfCurrentConveyor = find_the_end_of_conveyor(massiv, startPoint, GlobalEnd);
-                printf("%d - endOfCurrentConveyor\n", endOfCurrentConveyor );
+                endOfCurrentConveyor = find(massiv, startPoint, GlobalEnd );
+                printf("%d - REAL END OF CURENT CONVEYOR\n", endOfCurrentConveyor);
                 programMode = find_next_conveyor_start(massiv, &nextConveyorStart, endOfCurrentConveyor);
                 printf("%d - programMode, %d - nextConveyorStart\n", programMode, nextConveyorStart );
 

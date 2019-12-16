@@ -237,7 +237,7 @@ int GlobalEndForCleaning - конец всего массива для очис�
 int conveyor(char **massiv, int startPoint, int programMode, int endPoint, int GlobalEnd, int GlobalEndForCleaning)
 {
     int childProcess, mainProcess, descriptor, backgroundSon = 2, fileDescriptor[2], i = 0, nextStartPoint = startPoint, flag = 0;
-    int status, numberOfArguments;
+    int status, numberOfArguments, localEnd;
 
     numberOfArguments = count_number_of_processes(massiv, startPoint, endPoint);
     printf("%d - numberOfArguments\n", numberOfArguments );
@@ -272,11 +272,24 @@ int conveyor(char **massiv, int startPoint, int programMode, int endPoint, int G
                 }
                 close(fileDescriptor[1]);
                 close(fileDescriptor[0]);
-                execvp(massiv[nextStartPoint], &(massiv[nextStartPoint]));
-                printf("Some problem occured\n");
-                free_massiv(massiv, GlobalEndForCleaning);
-                exit(-1);
-
+                printf("%s - AAAAAAA, %d - nextStartPoint\n", massiv[nextStartPoint], nextStartPoint);
+                if (strcmp(massiv[nextStartPoint], "(\0") == 0)
+                {
+                    printf("Here\n");
+                    localEnd = find_local_end(massiv, nextStartPoint);
+                    printf("%d - localEnd\n", localEnd);
+                    {
+                        print_massiv(&massiv[1]);
+                        status = recursive_skobki(massiv, nextStartPoint + 1, localEnd, GlobalEnd);
+                    }
+                }
+                else
+                {
+                    execvp(massiv[nextStartPoint], &(massiv[nextStartPoint]));
+                    printf("Some problem occured\n");
+                    free_massiv(massiv, GlobalEndForCleaning);
+                    exit(-1);
+                }
             }
             else {
                 if (childProcess == -1)

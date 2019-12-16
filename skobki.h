@@ -6,6 +6,15 @@ int find_local_end(char **, int );
 
 
 
+
+/*
+@description Возвращает конечную позицию, если есть скобки
+@params - char **massiv - массив лексем, int localStart - начальная точка, int localEnd - конечная точка
+
+*/
+
+int find(char **, int , int );
+
 /*
 @description Находим режим, в котором запускается скобка
 @params char **massiv - массив лексем, int endPoint - позиция закрывающей соответствующей скобки

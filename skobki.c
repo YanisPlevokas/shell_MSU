@@ -24,7 +24,6 @@ int find_local_end(char **massiv, int localStart)
 	int i = localStart + 1;
 	while (massiv[i] != NULL)
 	{
-		printf("%s, %d\n", massiv[i], counter);
 		if (strcmp(massiv[i], "(\0") == 0)
             counter++;
         if (strcmp(massiv[i], ")\0") == 0)
@@ -47,7 +46,61 @@ int find_local_end(char **massiv, int localStart)
     }
 }
 
+/*
+@description Возвращает конечную позицию, если есть скобки
+@params - char **massiv - массив лексем, int localStart - начальная точка, int localEnd - конечная точка
 
+*/
+
+int find(char **massiv, int localStart, int localEnd)
+{
+    int skobkaFlag = 0;
+    int i = localStart;
+    int counter = 0;
+    printf("%d\n", localEnd);
+    while (1)
+    {
+        printf("%d - counter\n",  counter);
+        if (massiv[i] != NULL)
+            printf("%s - %d\n", massiv[i], i);
+        else
+            printf("NULL - %d\n", i);
+        if (i == localEnd)
+            {
+                return i;
+            }
+
+
+        if (counter != 0)
+            if (massiv[i] != NULL)
+            {
+                if ((strcmp(massiv[i], "(\0") == 0))
+                    counter++;
+                if (strcmp(massiv[i], ")\0") == 0)
+                    counter--;
+            }
+        if (counter == 0)
+        {
+
+            if (massiv[i] != NULL)
+            {
+                if ((strcmp(massiv[i], "&&\0") == 0) || (strcmp(massiv[i], "&\0") == 0)
+                    || (strcmp(massiv[i], "||\0") == 0) || (strcmp(massiv[i], ";\0") == 0))
+                {
+                    return i;
+                }
+                if ((strcmp(massiv[i], "(\0") == 0))
+                    counter++;
+            }
+        }
+        i++;
+
+    }
+
+
+
+
+}
 
 /*
 @description Находим режим, в котором запускается скобка
@@ -166,31 +219,31 @@ int recursive_skobki(char **massiv, int localStart, int localEnd, int GlobalEnd)
     putchar('\n');
     printf("МЫ В СКОБКАХ, %d - start, %d - end\n", localStart, localEnd);
 	while (nextConveyorStart < localEnd)
-        {
-            printf("%d - localStart %d - LocalEnd\n", localStart, localEnd );
-
-            endOfCurrentConveyor = find_the_end_of_conveyor(massiv, localStart, localEnd);
-            printf("%d - endOfCurrentConveyor\n", endOfCurrentConveyor );
-            programMode = find_next_conveyor_start(massiv, &nextConveyorStart, endOfCurrentConveyor);
-            printf("%d - programMode, %d - nextConveyorStart\n", programMode, nextConveyorStart );
-
-
-            if ((savedProgramMode == 2 && status == 0) || (savedProgramMode == 3 && status != 0)
-            || (savedProgramMode == 0) || (savedProgramMode == 1))
             {
-                status = conveyor(massiv, localStart, programMode, endOfCurrentConveyor, localEnd, GlobalEnd);
-            }
-            if ((savedProgramMode == 2 && status != 0) || (savedProgramMode == 3 && status == 0) )
-            {
-                break;
-            }
-            savedProgramMode = programMode;
+                printf("%d - startPoint %d - LocalEnd\n", localStart, localEnd );
+
+                endOfCurrentConveyor = find_the_end_of_conveyor(massiv, localStart, localEnd);
+                printf("%d - endOfCurrentConveyor\n", endOfCurrentConveyor );
+                programMode = find_next_conveyor_start(massiv, &nextConveyorStart, endOfCurrentConveyor);
+                printf("%d - programMode, %d - nextConveyorStart\n", programMode, nextConveyorStart );
 
 
-            localStart = nextConveyorStart;
-            printf("%d - status\n", status);
-            saveInOutPUT(saveOfStandardInput, saveOfStandardOutput);
-        }
+                if ((savedProgramMode == 2 && status == 0) || (savedProgramMode == 3 && status != 0)
+                || (savedProgramMode == 0) || (savedProgramMode == 1))
+                {
+                    status = conveyor(massiv, localStart, programMode, endOfCurrentConveyor, localEnd, GlobalEnd);
+                }
+                if ((savedProgramMode == 2 && status != 0) || (savedProgramMode == 3 && status == 0) )
+                {
+                    break;
+                }
+                savedProgramMode = programMode;
+
+
+                localStart = nextConveyorStart;
+                printf("%d - status\n", status);
+                saveInOutPUT(saveOfStandardInput, saveOfStandardOutput);
+            }
     printf("%d - status skobok\n", status);
     return status;
 
