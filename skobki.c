@@ -22,17 +22,22 @@ int find_local_end(char **massiv, int localStart)
 {
 	int counter = 1;
 	int i = localStart + 1;
-	while (massiv[i] != NULL)
+	while (1)
 	{
-		if (strcmp(massiv[i], "(\0") == 0)
-            counter++;
-        if (strcmp(massiv[i], ")\0") == 0)
-            counter--;
-        if (!counter)
+        if (massiv[i] != NULL)
         {
-            break;
+            printf("%s, %d\n", massiv[i], counter );
+    		if (strcmp(massiv[i], "(\0") == 0)
+                counter++;
+            if (strcmp(massiv[i], ")\0") == 0)
+                counter--;
+            if (!counter)
+            {
+                break;
+            }
         }
-		i++;
+    		i++;
+
 	}
 	if (counter)
 		return -1;
@@ -57,14 +62,8 @@ int find(char **massiv, int localStart, int localEnd)
     int skobkaFlag = 0;
     int i = localStart;
     int counter = 0;
-    printf("%d\n", localEnd);
     while (1)
     {
-        printf("%d - counter\n",  counter);
-        if (massiv[i] != NULL)
-            printf("%s - %d\n", massiv[i], i);
-        else
-            printf("NULL - %d\n", i);
         if (i == localEnd)
             {
                 return i;
@@ -217,6 +216,10 @@ int recursive_skobki(char **massiv, int localStart, int localEnd, int GlobalEnd)
     saveOfStandardInput = dup(STDIN_FILENO);
     saveOfStandardOutput = dup(STDOUT_FILENO);
     putchar('\n');
+
+
+    localStart = redirect(massiv, localStart);
+    nextConveyorStart = localStart;
     printf("МЫ В СКОБКАХ, %d - start, %d - end\n", localStart, localEnd);
 	while (nextConveyorStart < localEnd)
             {

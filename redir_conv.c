@@ -241,6 +241,7 @@ int conveyor(char **massiv, int startPoint, int programMode, int endPoint, int G
 
     numberOfArguments = count_number_of_processes(massiv, startPoint, endPoint);
     printf("%d - numberOfArguments\n", numberOfArguments );
+    printf("%d - startPoint\n", startPoint);
 
     mainProcess = fork();
     if (mainProcess == 0)
@@ -279,8 +280,8 @@ int conveyor(char **massiv, int startPoint, int programMode, int endPoint, int G
                     localEnd = find_local_end(massiv, nextStartPoint);
                     printf("%d - localEnd\n", localEnd);
                     {
-                        print_massiv(&massiv[1]);
                         status = recursive_skobki(massiv, nextStartPoint + 1, localEnd, GlobalEnd);
+                        exit(status);
                     }
                 }
                 else
