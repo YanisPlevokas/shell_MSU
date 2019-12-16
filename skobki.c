@@ -21,9 +21,7 @@
 int find_local_end(char **massiv, int localStart)
 {
 	int counter = 1;
-	int i = localStart;
-	free(massiv[i-1]);
-	massiv[i-1] = NULL;
+	int i = localStart + 1;
 	while (massiv[i] != NULL)
 	{
 		printf("%s, %d\n", massiv[i], counter);
@@ -33,18 +31,20 @@ int find_local_end(char **massiv, int localStart)
             counter--;
         if (!counter)
         {
-        	free(massiv[i]);
-        	massiv[i] = NULL;
-			return i;
+            break;
         }
 		i++;
 	}
 	if (counter)
 		return -1;
 	else
+    {
+        free(massiv[localStart]);
+        massiv[localStart] = NULL;
 		free(massiv[i]);
 		massiv[i]= NULL;
 		return i;
+    }
 }
 
 
@@ -119,19 +119,25 @@ int redirect(char **massiv, int localStart)
     int i = localStart;
     while (1) 
         {
-            if ( (!(isOperatorEqualLess = strcmp(massiv[i], "<\0") ) ) || (!(isOperatorEqualBigger = (strcmp(massiv[i], ">\0"))) ) || (!(isOperatorEqualBiggerX2 = strcmp(massiv[i], ">>\0")) ) )
+            if (massiv[i] != NULL)
             {
-                redirection_funct(massiv[i], massiv[i+1]);
-                i = i + 2;
+                if ( (!(isOperatorEqualLess = strcmp(massiv[i], "<\0") ) ) || (!(isOperatorEqualBigger = (strcmp(massiv[i], ">\0"))) ) || (!(isOperatorEqualBiggerX2 = strcmp(massiv[i], ">>\0")) ) )
+                {
+                    redirection_funct(massiv[i], massiv[i+1]);
+                    i = i + 2;
+                }
+                else 
+                {
+                    return i;
+                }
             }
-            else 
-            {
-            	printf("s\n");
+            else
                 return i;
-            }
         }
 
 }
+
+
 
 /*
 
@@ -143,34 +149,36 @@ int localEnd - конец для данного выражения внутри 
 
 
 
-int recursive_skobki(char **massiv, int localStart, int localEnd, int GlobalEnd, int Mode)
+int recursive_skobki(char **massiv, int localStart, int localEnd, int GlobalEnd)
 {
-	int i, count = 0, startPoint, status = 0, flag = 0;
+	int i, count = 0, status = 0, flagSkobka, backgroundSon;
 
-    int nextConveyorStart = localEnd, programMode = 0, savedProgramMode = 0;
+    int nextConveyorStart = localStart, programMode = 0, savedProgramMode = 0;
 
     int saveOfStandardInput, saveOfStandardOutput;
 
     int endOfCurrentConveyor;
 
+
+
     saveOfStandardInput = dup(STDIN_FILENO);
     saveOfStandardOutput = dup(STDOUT_FILENO);
-
-
+    putchar('\n');
+    printf("МЫ В СКОБКАХ, %d - start, %d - end\n", localStart, localEnd);
 	while (nextConveyorStart < localEnd)
         {
-            printf("%d - startPoint %d - GlobalEnd\n", startPoint, localEnd );
+            printf("%d - localStart %d - LocalEnd\n", localStart, localEnd );
 
-            endOfCurrentConveyor = find_the_end_of_conveyor(massiv, startPoint, localEnd);
+            endOfCurrentConveyor = find_the_end_of_conveyor(massiv, localStart, localEnd);
             printf("%d - endOfCurrentConveyor\n", endOfCurrentConveyor );
             programMode = find_next_conveyor_start(massiv, &nextConveyorStart, endOfCurrentConveyor);
             printf("%d - programMode, %d - nextConveyorStart\n", programMode, nextConveyorStart );
 
 
-            if ((savedProgramMode == 2 && status == 0 && flag == 0) || (savedProgramMode == 3 && status != 0 && flag == 0)
+            if ((savedProgramMode == 2 && status == 0) || (savedProgramMode == 3 && status != 0)
             || (savedProgramMode == 0) || (savedProgramMode == 1))
             {
-                status = conveyor(massiv, startPoint, programMode, endOfCurrentConveyor, localEnd, GlobalEnd);
+                status = conveyor(massiv, localStart, programMode, endOfCurrentConveyor, localEnd, GlobalEnd);
             }
             if ((savedProgramMode == 2 && status != 0) || (savedProgramMode == 3 && status == 0) )
             {
@@ -179,11 +187,12 @@ int recursive_skobki(char **massiv, int localStart, int localEnd, int GlobalEnd,
             savedProgramMode = programMode;
 
 
-            startPoint = nextConveyorStart;
+            localStart = nextConveyorStart;
             printf("%d - status\n", status);
             saveInOutPUT(saveOfStandardInput, saveOfStandardOutput);
         }
-        return status;
+    printf("%d - status skobok\n", status);
+    return status;
 
 
 
